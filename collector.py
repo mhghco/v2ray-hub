@@ -3,7 +3,8 @@ import re
 
 # لیست کانال‌هایی که می‌خواهی از آن‌ها کد جمع کنی
 CHANNELS = [
-    "v2wray"
+    "v2wray",
+    "farah_vpn"
 ]
 
 def scrape():
