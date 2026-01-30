@@ -3,10 +3,7 @@ import re
 
 # لیست کانال‌هایی که می‌خواهی از آن‌ها کد جمع کنی
 CHANNELS = [
-    "v2ray_outlinefree", 
-    "v2ray_free_conf", 
-    "biatun_v2ray",
-    "v2ray_config_pool"
+    "v2wray"
 ]
 
 def scrape():
