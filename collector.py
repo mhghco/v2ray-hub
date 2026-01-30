@@ -4,7 +4,8 @@ from urllib.parse import unquote
 
 # لیست کانال‌های هدف
 CHANNELS = [
-    "farah_vpn"
+    "farah_vpn",
+    "AR14N24B"
 ]
 
 def scrape():
