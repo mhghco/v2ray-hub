@@ -1,0 +1,43 @@
+name: V2Ray Collector Automation
+
+on:
+  schedule:
+    # اجرا هر 15 دقیقه یکبار
+    - cron: '*/15 * * * *'
+  # امکان اجرای دستی
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 python-dateutil
+
+      - name: Run Collectors
+        run: |
+          echo "Running Hourly Collector..."
+          python collector_hourly.py
+          echo "Running Recent Collector..."
+          python collector_recent.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add configs_hourly.txt configs_recent.txt
+          # فقط اگر تغییری بود کامیت کن
+          git commit -m "Auto-update configs [$(date)]" || exit 0
+          # پوش کردن بدون نیاز به حذف دستی فایل‌ها
+          git push
