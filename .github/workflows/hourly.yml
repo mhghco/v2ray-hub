@@ -1,8 +1,8 @@
-name: Hourly 1-Hour Collector
+name: Hourly 1-Hour Collector (15m Frequency)
 
 on:
   schedule:
-    - cron: '0 * * * *' # سر هر ساعت اجرا می‌شود
+    - cron: '*/15 * * * *' 
   workflow_dispatch:
 
 jobs:
@@ -31,5 +31,5 @@ jobs:
           git config --global user.email "actions@github.com"
           git pull origin main --rebase
           git add configs_hourly.txt
-          git commit -m "Update configs_hourly.txt" || exit 0
+          git commit -m "Update hourly configs" || exit 0
           git push
