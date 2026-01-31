@@ -20,7 +20,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests beautifulsoup4 python-dateutil
 
       - name: Run collector
         run: python collector.py
