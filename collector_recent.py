@@ -9,28 +9,34 @@ CHANNELS = [
   "VpnMaan", "XpnTeam", "YamYamProxy", "anty_filter", "beshcan", "bored_vpn", "chat_nakone", "configraygan", "confing_proxi1", "cpy_teeL", "duckvp_n",
   "hormozvpn", "iHomeii", "internetmelil", "mehrosaboran", "meliproxyy", "mitivpn", "nufilter", "numb_frozen", "shankamil", "sogoandfuckyourlove", "tabiatvpn1",
   "v2FreeHub", "v2raygencon", "v2rayngvpn", "v2wray", "wallpaper_4k3d", "xsfilternet"
-           ]
+]
 
 def get_recent():
     all_configs = []
-    pattern = r"(?:vmess|vless|trojan|ss|ssr|hy2|tuic)://[a-zA-Z0-9\-_@.:?=&%#]+"
+    pattern = r"(?:vmess|vless|trojan|ss|ssr|hy2|tuic)://[a-zA-Z0-9\-_@.:?=&%#\/]+"
+
+    print("Starting recent collection...")
 
     for channel in CHANNELS:
         try:
-            response = requests.get(f"https://t.me/s/{channel}", timeout=15)
+            response = requests.get(f"https://t.me/s/{channel}", timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             messages = soup.find_all('div', class_='tgme_widget_message_wrap')
             
-            # فقط ۲۰ پیام آخر هر کانال را بررسی کن
-            for msg in messages[-20:]:
-                text = msg.find('div', class_='tgme_widget_message_text')
-                if text:
-                    configs = re.findall(pattern, text.get_text())
-                    all_configs.extend(configs)
-        except: continue
+            # بررسی 25 پیام آخر
+            for msg in messages[-25:]:
+                # جستجو در سورس HTML پیام برای پیدا کردن لینک‌های مخفی
+                msg_content = str(msg)
+                configs = re.findall(pattern, msg_content)
+                all_configs.extend(configs)
+        except Exception as e:
+            continue
+
+    unique_configs = list(set(all_configs))
+    print(f"Found {len(unique_configs)} unique recent configs.")
 
     with open("configs_recent.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(list(set(all_configs))))
+        f.write("\n".join(unique_configs))
 
 if __name__ == "__main__":
     get_recent()
