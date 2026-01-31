@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dateutil import parser
 
 CHANNELS = [
@@ -15,30 +15,44 @@ CHANNELS = [
 
 def get_hourly():
     all_configs = []
-    pattern = r"(?:vmess|vless|trojan|ss|ssr|hy2|tuic)://[a-zA-Z0-9\-_@.:?=&%#]+"
-    now = datetime.now().astimezone() # زمان فعلی با منطقه زمانی
+    # پترن بهبود یافته برای گرفتن لینک‌های ناقص یا انکود شده
+    pattern = r"(?:vmess|vless|trojan|ss|ssr|hy2|tuic)://[a-zA-Z0-9\-_@.:?=&%#\/]+"
+    
+    # استفاده از زمان UTC دقیق برای مقایسه
+    now = datetime.now(timezone.utc)
+
+    print(f"Starting hourly collection at {now}")
 
     for channel in CHANNELS:
         try:
-            response = requests.get(f"https://t.me/s/{channel}", timeout=15)
+            # درخواست به نسخه موبایل یا وب تلگرام
+            response = requests.get(f"https://t.me/s/{channel}", timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
-            # پیدا کردن تمام کادرهای پیام
             messages = soup.find_all('div', class_='tgme_widget_message_wrap')
             
             for msg in messages:
                 time_tag = msg.find('time')
                 if time_tag and time_tag.get('datetime'):
-                    msg_time = parser.parse(time_tag.get('datetime'))
-                    # اگر پیام مربوط به کمتر از ۱ ساعت پیش باشد
+                    # پارس کردن زمان پیام و تبدیل به UTC
+                    msg_time = parser.parse(time_tag.get('datetime')).astimezone(timezone.utc)
+                    
+                    # بررسی شرط یک ساعت اخیر
                     if now - msg_time <= timedelta(hours=1):
-                        text = msg.find('div', class_='tgme_widget_message_text')
-                        if text:
-                            configs = re.findall(pattern, text.get_text())
-                            all_configs.extend(configs)
-        except: continue
+                        # نکته مهم: جستجو در کل HTML پیام (نه فقط متن)
+                        # این کار باعث میشه لینک‌های داخل تگ <a> هم پیدا بشن
+                        msg_content = str(msg)
+                        configs = re.findall(pattern, msg_content)
+                        all_configs.extend(configs)
+        except Exception as e:
+            print(f"Error scraping {channel}: {e}")
+            continue
 
+    # حذف تکراری‌ها و ذخیره
+    unique_configs = list(set(all_configs))
+    print(f"Found {len(unique_configs)} unique configs in the last hour.")
+    
     with open("configs_hourly.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(list(set(all_configs))))
+        f.write("\n".join(unique_configs))
 
 if __name__ == "__main__":
     get_hourly()
