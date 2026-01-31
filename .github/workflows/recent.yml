@@ -1,0 +1,35 @@
+name: Recent 20 Posts Collector
+
+on:
+  schedule:
+    - cron: '30 * * * *' # هر ساعت در دقیقه ۳۰ اجرا می‌شود (تا با قبلی همزمان نشود)
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run Recent Collector
+        run: python collector_recent.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git pull origin main --rebase
+          git add configs_recent.txt
+          git commit -m "Update configs_recent.txt" || exit 0
+          git push
