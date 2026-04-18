@@ -1,9 +1,9 @@
 name: V2Ray Collector Automation
 
 on:
-  #schedule:
-    # اجرا هر 15 دقیقه یکبار
-    #- cron: '*/15 * * * *'
+  schedule:
+    # اجرا هر 1 ساعت یکبار (دقیقه صفر هر ساعت)
+    - cron: '0 * * * *'
   # امکان اجرای دستی
   workflow_dispatch:
 
